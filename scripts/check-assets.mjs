@@ -6,6 +6,12 @@ import { join } from "node:path";
 const src = await readFile(join(process.cwd(), "src/data/products.ts"), "utf8");
 const paths = [...new Set([...src.matchAll(/"(\/(?:products|collections)\/[^"]+)"/g)].map((m) => m[1]))];
 
+if (paths.length === 0) {
+  console.error("check:assets — no image paths extracted from src/data/products.ts");
+  console.error("This usually means the file moved or now builds paths dynamically.");
+  process.exit(1);
+}
+
 const missing = [];
 for (const p of paths) {
   try {

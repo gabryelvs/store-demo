@@ -75,4 +75,15 @@ describe("cartReducer", () => {
     cartReducer(added, { type: "ADD", line: hoodieM });
     expect(added.lines[0].qty).toBe(1);
   });
+
+  it("ignores an ADD with a non-positive qty", () => {
+    const state = cartReducer(initialCart, { type: "ADD", line: { ...hoodieM, qty: 0 } });
+    expect(state.lines).toEqual([]);
+  });
+
+  it("removes the line when a negative ADD brings qty to zero", () => {
+    let state = cartReducer(initialCart, { type: "ADD", line: hoodieM });
+    state = cartReducer(state, { type: "ADD", line: { ...hoodieM, qty: -1 } });
+    expect(state.lines).toEqual([]);
+  });
 });

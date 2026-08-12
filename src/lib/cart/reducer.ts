@@ -31,12 +31,16 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     case "ADD": {
       const existing = state.lines.find((l) => l.sku === action.line.sku);
       if (!existing) {
-        return { lines: [...state.lines, { ...action.line, qty: clamp(action.line.qty) }] };
+        const qty = clamp(action.line.qty);
+        if (qty === 0) return state;
+        return { lines: [...state.lines, { ...action.line, qty }] };
       }
       return {
-        lines: state.lines.map((l) =>
-          l.sku === action.line.sku ? { ...l, qty: clamp(l.qty + action.line.qty) } : l,
-        ),
+        lines: state.lines
+          .map((l) =>
+            l.sku === action.line.sku ? { ...l, qty: clamp(l.qty + action.line.qty) } : l,
+          )
+          .filter((l) => l.qty !== 0),
       };
     }
 

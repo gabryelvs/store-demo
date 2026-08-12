@@ -8,5 +8,6 @@ export default defineConfig({
     // Cart logic is pure; jsdom is only needed for the storage tests.
     environment: "jsdom",
     include: ["src/**/*.test.ts"],
+    setupFiles: ["./vitest.setup.ts"],
   },
 });

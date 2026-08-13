@@ -4,7 +4,7 @@ import { SplitHeading } from "@/components/motion/SplitHeading";
 
 export function Hero() {
   return (
-    <section className="relative h-[78vh] min-h-[520px] w-full overflow-hidden">
+    <section className="relative h-[78svh] min-h-[520px] w-full overflow-hidden">
       <Image
         src="/collections/drop-04.webp"
         alt="Drop 04 campaign image"

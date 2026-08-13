@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart/context";
 import { useLockScroll } from "@/hooks/useLockScroll";
 import { findVariant } from "@/lib/shop";
@@ -23,8 +23,20 @@ const BACKGROUND_SELECTOR = 'header, main, footer, [data-chrome="marquee"]';
 export function CartDrawer() {
   const { lines, subtotalP, isOpen, closeCart, setQty, remove, lastAdded } = useCart();
   const panel = useRef<HTMLDivElement>(null);
+  // Tracks which line to flash. lastAdded itself never clears (it also
+  // feeds the screen-reader announcement), so without a local copy that
+  // times out, reopening the bag later would re-tint whatever was added
+  // last time as if it were just added again.
+  const [tinted, setTinted] = useState<typeof lastAdded>(null);
 
   useLockScroll(isOpen);
+
+  useEffect(() => {
+    if (!lastAdded) return;
+    setTinted(lastAdded);
+    const timer = setTimeout(() => setTinted(null), 2000);
+    return () => clearTimeout(timer);
+  }, [lastAdded]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -146,8 +158,10 @@ export function CartDrawer() {
                   const located = findVariant(line.sku);
                   if (!located) return null;
                   const { product } = located;
-                  const isLatest =
-                    lastAdded?.title === product.title && lastAdded?.size === line.size;
+                  const isLatest = tinted?.title === product.title && tinted?.size === line.size;
+                  // Shared with the "−" button's label at qty 1, where the click
+                  // has the same effect as Remove.
+                  const removeLabel = `Remove ${product.title}, size ${line.size}, from bag`;
 
                   return (
                     <li
@@ -169,8 +183,18 @@ export function CartDrawer() {
                           <div className="flex items-center border border-line">
                             <button
                               type="button"
-                              onClick={() => setQty(line.sku, line.qty - 1)}
-                              aria-label={`Decrease quantity of ${product.title}, size ${line.size}`}
+                              onClick={() => {
+                                setQty(line.sku, line.qty - 1);
+                                // At qty 1 this deletes the line, unmounting the
+                                // button that just had focus. Recover it onto the
+                                // panel before that happens.
+                                if (line.qty === 1) panel.current?.focus();
+                              }}
+                              aria-label={
+                                line.qty === 1
+                                  ? removeLabel
+                                  : `Decrease quantity of ${product.title}, size ${line.size}`
+                              }
                               className="px-2 py-1 text-sm transition-colors duration-[var(--duration-ui)] hover:text-accent"
                             >
                               −
@@ -189,7 +213,13 @@ export function CartDrawer() {
 
                           <button
                             type="button"
-                            onClick={() => remove(line.sku)}
+                            onClick={() => {
+                              remove(line.sku);
+                              // Removing unmounts this button; recover focus onto
+                              // the panel instead of leaving it on document.body.
+                              panel.current?.focus();
+                            }}
+                            aria-label={removeLabel}
                             className="text-xs text-muted underline transition-colors duration-[var(--duration-ui)] hover:text-paper"
                           >
                             Remove

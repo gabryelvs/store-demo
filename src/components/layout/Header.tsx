@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCart } from "@/lib/cart/context";
 import { getCollections } from "@/lib/shop";
 import { MobileNav } from "./MobileNav";
@@ -12,6 +12,11 @@ export function Header() {
   const [solid, setSolid] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const collections = getCollections();
+
+  // Stable reference: MobileNav's effect depends on this, and Header
+  // re-renders on every scroll tick (setHidden/setSolid). An inline arrow
+  // here would tear the focus trap down and rebuild it on each scroll event.
+  const closeNav = useCallback(() => setNavOpen(false), []);
 
   // Hide on scroll down, return on scroll up. Retail headers earn their space
   // back only when the visitor looks like they want to navigate.
@@ -79,7 +84,7 @@ export function Header() {
         </div>
       </header>
 
-      <MobileNav open={navOpen} onClose={() => setNavOpen(false)} />
+      <MobileNav open={navOpen} onClose={closeNav} />
     </>
   );
 }

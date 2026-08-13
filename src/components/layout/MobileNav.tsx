@@ -6,6 +6,7 @@ import { getCollections } from "@/lib/shop";
 import { useLockScroll } from "@/hooks/useLockScroll";
 
 const FOCUSABLE_SELECTOR = 'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
+const BACKGROUND_SELECTOR = 'header, main, footer, [data-chrome="marquee"]';
 
 export function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
   useLockScroll(open);
@@ -17,6 +18,13 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
     panelRef.current?.focus();
+
+    // Hide the rest of the page from assistive tech while the panel is
+    // open. The Tab trap below only intercepts literal Tab presses; a
+    // screen-reader user navigating by swipe/rotor/virtual cursor could
+    // otherwise still reach the header, main and footer behind the overlay.
+    const backgroundEls = Array.from(document.querySelectorAll<HTMLElement>(BACKGROUND_SELECTOR));
+    for (const el of backgroundEls) el.inert = true;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -37,6 +45,16 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
       const active = document.activeElement;
 
       if (e.shiftKey) {
+        // Immediately after opening, document.activeElement is the panel
+        // div itself. panel.contains(active) is true (a node contains
+        // itself), so without this the wrap below never fires on the very
+        // first keypress and focus escapes backwards to the trigger.
+        if (active === panel) {
+          e.preventDefault();
+          last.focus();
+          return;
+        }
+
         if (active === first || !panel.contains(active)) {
           e.preventDefault();
           last.focus();
@@ -51,6 +69,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
+      for (const el of backgroundEls) el.inert = false;
       previouslyFocused?.focus();
     };
   }, [open, onClose]);

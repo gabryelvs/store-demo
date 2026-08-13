@@ -13,6 +13,7 @@ export function ProductDetail({ product }: { product: Product }) {
   const [active, setActive] = useState(0);
 
   const selected = product.variants.find((v) => v.sku === sku) ?? null;
+  const soldOut = product.variants.every((v) => !v.inStock);
 
   return (
     <div className="grid gap-8 px-4 py-10 md:grid-cols-2 md:px-8">
@@ -64,22 +65,38 @@ export function ProductDetail({ product }: { product: Product }) {
         <p className="pt-5 text-sm leading-relaxed text-muted">{product.description}</p>
 
         <div className="pt-7">
-          <p className="pb-2 font-display text-[10px] tracking-[0.18em] text-muted">SELECT SIZE</p>
+          {!soldOut && (
+            <p className="pb-2 font-display text-[10px] tracking-[0.18em] text-muted">SELECT SIZE</p>
+          )}
+          {soldOut && (
+            <p className="pb-2 font-display text-[10px] tracking-[0.18em] text-muted">SIZES</p>
+          )}
           <SizePicker variants={product.variants} selectedSku={sku} onSelect={setSku} />
         </div>
 
-        <button
-          type="button"
-          disabled={!selected}
-          onClick={() => {
-            if (!selected) return;
-            add({ handle: product.handle, sku: selected.sku, size: selected.size, qty: 1 });
-          }}
-          className="mt-6 w-full bg-accent py-4 font-display text-[11px] font-extrabold tracking-[0.16em] text-ink transition-colors duration-[var(--duration-ui)] ease-brand disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
-        >
-          ADD TO BAG
-        </button>
-        {!selected && <p className="pt-2 text-xs text-muted">Select a size</p>}
+        {soldOut ? (
+          <button
+            type="button"
+            disabled
+            className="mt-6 w-full bg-accent py-4 font-display text-[11px] font-extrabold tracking-[0.16em] text-ink transition-colors duration-[var(--duration-ui)] ease-brand disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
+          >
+            SOLD OUT
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={!selected}
+            onClick={() => {
+              if (!selected) return;
+              add({ handle: product.handle, sku: selected.sku, size: selected.size, qty: 1 });
+            }}
+            className="mt-6 w-full bg-accent py-4 font-display text-[11px] font-extrabold tracking-[0.16em] text-ink transition-colors duration-[var(--duration-ui)] ease-brand disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
+          >
+            ADD TO BAG
+          </button>
+        )}
+        {soldOut && <p className="pt-2 text-xs text-muted">This piece has sold out.</p>}
+        {!soldOut && !selected && <p className="pt-2 text-xs text-muted">Select a size</p>}
 
         <ul className="mt-8 border-t border-line pt-6 text-sm text-muted">
           {product.details.map((d) => (

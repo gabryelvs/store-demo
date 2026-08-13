@@ -32,7 +32,7 @@ export function ProductCard({ product, onQuickAdd, priority = false }: Props) {
           </span>
         )}
 
-        <Link href={`/products/${product.handle}`} aria-label={product.title}>
+        <Link href={`/products/${product.handle}`} aria-label={product.title} className="absolute inset-0 z-10">
           <Image
             src={product.images[0]}
             alt={`${product.title}, front view`}

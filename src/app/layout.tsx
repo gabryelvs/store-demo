@@ -4,6 +4,7 @@ import { CartProvider } from "@/lib/cart/context";
 import { AnnouncementMarquee } from "@/components/layout/AnnouncementMarquee";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { CartAnnouncer } from "@/components/shop/CartAnnouncer";
 import "./globals.css";
 
 const display = Archivo({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <AnnouncementMarquee />
           <Header />
+          <CartAnnouncer />
           <main id="main">
             {children}
           </main>

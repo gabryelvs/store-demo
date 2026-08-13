@@ -23,8 +23,18 @@ type MarqueeProps = {
  * started, the reset is invisible — this is what makes it seamless rather than
  * a visible snap back.
  *
- * Duration is derived from measured width so that speed stays constant no matter
- * how much content is inside. A fixed duration would make long content race.
+ * The tween animates xPercent, not x. `half` (a pixel measurement of
+ * scrollWidth) is taken once, before layout has necessarily settled — in
+ * particular before Archivo has necessarily swapped in for the fallback
+ * font. If the tween target were a pixel value and the webfont then loaded
+ * and changed the track's width, the animated x would no longer correspond
+ * to "exactly half the track" and the loop would visibly snap once per
+ * cycle. xPercent is resolved against the element's own width on every
+ * frame, so it stays exactly at the halfway point regardless of when (or
+ * whether) the font swap resizes the content.
+ *
+ * Duration is derived from measured width so that speed stays roughly constant no
+ * matter how much content is inside. A fixed duration would make long content race.
  */
 export function Marquee({
   children,
@@ -48,13 +58,13 @@ export function Marquee({
         if (half <= 0) return;
 
         const tween = gsap.to(el, {
-          x: direction === "left" ? -half : 0,
+          xPercent: direction === "left" ? -50 : 0,
           duration: half / speed,
           ease: "none",
           repeat: -1,
           // Start the rightward variant already displaced, so it travels into
           // view rather than out of it.
-          startAt: direction === "right" ? { x: -half } : undefined,
+          startAt: direction === "right" ? { xPercent: -50 } : undefined,
         });
 
         if (!pauseOnHover) return () => tween.kill();

@@ -6,7 +6,9 @@ const QUERY = "(prefers-reduced-motion: reduce)";
 
 /** For JS-driven motion that cannot be expressed through gsap.matchMedia. */
 export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+  const [reduced, setReduced] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(QUERY).matches,
+  );
 
   useEffect(() => {
     const mql = window.matchMedia(QUERY);

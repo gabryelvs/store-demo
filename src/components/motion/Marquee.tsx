@@ -2,6 +2,7 @@
 
 import { useRef, type ReactNode } from "react";
 import { gsap, useGSAP, motionOK } from "@/lib/gsap";
+import { DUR } from "@/lib/motion";
 
 type MarqueeProps = {
   children: ReactNode;
@@ -58,8 +59,8 @@ export function Marquee({
 
         if (!pauseOnHover) return () => tween.kill();
 
-        const slow = () => gsap.to(tween, { timeScale: 0, duration: 0.4 });
-        const resume = () => gsap.to(tween, { timeScale: 1, duration: 0.4 });
+        const slow = () => gsap.to(tween, { timeScale: 0, duration: DUR.panel });
+        const resume = () => gsap.to(tween, { timeScale: 1, duration: DUR.panel });
         root.current?.addEventListener("mouseenter", slow);
         root.current?.addEventListener("mouseleave", resume);
 

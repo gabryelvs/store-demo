@@ -295,7 +295,8 @@ export const PRODUCTS: Product[] = [
     collections: ["accessories", "drop-04"],
     badges: ["NEW"],
     variants: oneSize("NGT-CP"),
-    description: "Low-profile cap in a brushed twill with a curved brim and a tonal embroidered mark.",
-    details: ["100% cotton twill", "Adjustable strap", "One size"],
+    description:
+      "The night-run version of the pit cap: same low-profile silhouette in a darker brushed twill, with reflective trim around the brim for the walk back after the lights go down.",
+    details: ["100% brushed cotton twill", "Reflective trim at the brim", "Adjustable strap, one size"],
   },
 ];

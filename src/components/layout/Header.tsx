@@ -32,6 +32,21 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // MobileNav is only hidden by CSS (md:hidden) — its open/closed state lives
+  // here in React. If the viewport crosses to md or wider while the panel is
+  // open, the panel disappears visually but navOpen (and with it the
+  // scroll-lock and inert-background effects inside MobileNav) stays true,
+  // freezing the page with no visible way to close it. Force the nav closed
+  // on that crossing so those effects tear down.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = () => {
+      if (mq.matches) setNavOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <>
       <a

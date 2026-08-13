@@ -81,6 +81,9 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
     <AnimatePresence>
       {product && (
         <motion.div
+          // Keyed by product so reopening on a different card during the exit
+          // animation reads as a new instance, not a continuation of the old one.
+          key={product.handle}
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

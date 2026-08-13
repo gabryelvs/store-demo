@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Archivo, Inter } from "next/font/google";
 import { CartProvider } from "@/lib/cart/context";
+import { AnnouncementMarquee } from "@/components/layout/AnnouncementMarquee";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const display = Archivo({
@@ -21,7 +24,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <AnnouncementMarquee />
+          <Header />
+          <main id="main" className="pt-14">
+            {children}
+          </main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

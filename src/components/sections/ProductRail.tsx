@@ -6,8 +6,17 @@ import { getProductsInCollection } from "@/lib/shop";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useQuickAdd } from "@/components/shop/QuickAddProvider";
 
-export function ProductRail({ title, handle }: { title: string; handle: string }) {
-  const products = getProductsInCollection(handle);
+export function ProductRail({
+  title,
+  handle,
+  exclude,
+}: {
+  title: string;
+  handle: string;
+  /** Handle to filter out of the rail — e.g. the product whose own page is rendering it. */
+  exclude?: string;
+}) {
+  const products = getProductsInCollection(handle).filter((p) => p.handle !== exclude);
   const { openQuickAdd } = useQuickAdd();
   const track = useRef<HTMLDivElement>(null);
 

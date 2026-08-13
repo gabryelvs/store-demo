@@ -19,6 +19,28 @@ npm run check:assets   # fails the build if the catalogue references a missing p
 product photo fails CI/build rather than shipping a broken image. `npm start`
 serves the production build.
 
+## Deployment
+
+Live at **https://store-demo-gv.fly.dev** — one `shared-cpu-1x` machine in
+`lhr`, deployed from this repo with `flyctl deploy --remote-only` (no local
+Docker needed; Fly builds the image).
+
+`next.config.ts` sets `output: "standalone"` so the `Dockerfile` can ship the
+traced server bundle instead of a full `node_modules`, and `images.unoptimized`
+because the 51 photos in `public/` are already encoded at exactly the sizes the
+layout renders — re-optimising them at runtime would burn memory to produce the
+same bytes.
+
+The machine uses `auto_stop_machines = "suspend"` with `min_machines_running
+= 0`: it suspends when idle and resumes from a memory snapshot in well under a
+second, so an idle demo costs nothing but a cold link still opens instantly in
+front of a prospect.
+
+To redeploy after a change: `flyctl deploy --remote-only`. If the app moves to
+a custom domain, update `metadataBase` in `src/app/layout.tsx` (or set
+`NEXT_PUBLIC_SITE_ORIGIN` at build time) or link previews will keep resolving
+their image against the old origin.
+
 `check:assets` (`scripts/check-assets.mjs`) scans both `src/data/products.ts`
 and every `.tsx` file under `src/components/**` for `/products/...` and
 `/collections/...` string literals — the catalogue isn't the only place a

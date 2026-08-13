@@ -55,7 +55,7 @@ export function ProductCard({ product, onQuickAdd, priority = false }: Props) {
           <button
             type="button"
             onClick={() => onQuickAdd(product)}
-            className="absolute inset-x-2 bottom-2 z-20 translate-y-0 bg-accent py-2 font-display text-[10px] font-extrabold tracking-[0.16em] text-ink transition-transform duration-[var(--duration-panel)] ease-expo md:translate-y-[140%] md:group-hover:translate-y-0"
+            className="absolute inset-x-2 bottom-2 z-20 translate-y-0 bg-accent py-2 font-display text-[10px] font-extrabold tracking-[0.16em] text-ink transition-transform duration-[var(--duration-panel)] ease-expo md:translate-y-[140%] md:group-hover:translate-y-0 md:group-focus-within:translate-y-0"
           >
             QUICK ADD +
           </button>

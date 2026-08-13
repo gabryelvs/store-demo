@@ -51,6 +51,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [state.lines, hydrated]);
 
   const add = useCallback((line: CartLine) => {
+    // Unknown skus would count in the badge but price at zero; skip them.
+    if (!isKnownSku(line.sku)) return;
+
     dispatch({ type: "ADD", line });
     const located = findVariant(line.sku);
     if (located) setLastAdded({ title: located.product.title, size: line.size });

@@ -20,8 +20,25 @@ const display = Archivo({
 const body = Inter({ subsets: ["latin"], variable: "--font-body-src" });
 
 export const metadata: Metadata = {
+  // This demo is distributed by pasting its URL straight into a message, so
+  // the unfurl (OG/Twitter card) is often a prospect's first impression of
+  // it — worth getting right even though nothing here is deployed yet.
+  // localhost:3000 is the placeholder while dev-only; swap this for the
+  // deployed origin once the demo actually has one.
+  metadataBase: new URL("http://localhost:3000"),
   title: "SECTOR—9",
-  description: "Demo streetwear store.",
+  description:
+    "A fast, animated, accessible streetwear storefront demo — built to show what your catalogue could feel like on this stack.",
+  openGraph: {
+    title: "SECTOR—9",
+    description:
+      "A fast, animated, accessible streetwear storefront demo — built to show what your catalogue could feel like on this stack.",
+    type: "website",
+    images: [{ url: "/collections/drop-04.webp", width: 1600, height: 1000 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

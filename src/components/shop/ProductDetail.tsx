@@ -27,6 +27,12 @@ export function ProductDetail({ product }: { product: Product }) {
               fill
               priority={i === 0}
               sizes="(max-width: 768px) 100vw, 50vw"
+              // opacity: 0 keeps the inactive frames in the layout for the
+              // cross-fade, but it does not remove them from the
+              // accessibility tree — without aria-hidden a screen reader
+              // announces every view's alt text on each visit to this
+              // section, not just the one actually visible.
+              aria-hidden={i !== active}
               className={`object-cover transition-opacity duration-[var(--duration-xfade)] ${
                 i === active ? "opacity-100" : "opacity-0"
               }`}

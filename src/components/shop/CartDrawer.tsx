@@ -41,6 +41,17 @@ export function CartDrawer() {
   useEffect(() => {
     if (!isOpen) return;
 
+    // Quick-view's ADD TO BAG calls add() (which opens this drawer, isOpen
+    // -> true) and then onClose() (which nulls QuickView's product) inside
+    // the same event handler, so both changes land in one commit. That
+    // commit runs every effect *cleanup* across the tree before it runs any
+    // effect *setup* — so QuickView's cleanup (restoring focus to the quick
+    // add button, un-inerting the background) is guaranteed to finish
+    // before this effect's setup below steals focus into the drawer and
+    // re-inerts the background. Without that ordering guarantee the two
+    // overlays could race: this effect could grab focus/inert first, then
+    // QuickView's cleanup would run after and hand focus back to the
+    // trigger while leaving the drawer's own background un-inerted.
     const previouslyFocused = document.activeElement as HTMLElement | null;
     panel.current?.focus();
 

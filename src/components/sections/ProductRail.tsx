@@ -58,9 +58,12 @@ export function ProductRail({ title, handle }: { title: string; handle: string }
         ref={track}
         className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:px-8"
       >
-        {products.map((product, i) => (
+        {products.map((product) => (
           <div key={product.handle} className="w-[62vw] shrink-0 snap-start md:w-[22vw]">
-            <ProductCard product={product} onQuickAdd={openQuickAdd} priority={i < 2} />
+            {/* Rails sit below the fold on the home page, which already has
+                a priority hero. Marking cards here priority would compete
+                with the real LCP candidate for preload bandwidth. */}
+            <ProductCard product={product} onQuickAdd={openQuickAdd} />
           </div>
         ))}
       </div>

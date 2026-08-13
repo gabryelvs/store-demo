@@ -19,14 +19,31 @@ npm run check:assets   # fails the build if the catalogue references a missing p
 product photo fails CI/build rather than shipping a broken image. `npm start`
 serves the production build.
 
+`check:assets` (`scripts/check-assets.mjs`) scans both `src/data/products.ts`
+and every `.tsx` file under `src/components/**` for `/products/...` and
+`/collections/...` string literals — the catalogue isn't the only place a
+photo path can be hard-coded (see `Hero.tsx` and `LookbookParallax.tsx`
+below), and a path hard-coded outside `products.ts` can go missing just as
+easily as one inside it.
+
 ## Architecture
 
 Pages are React Server Components under Next's App Router (`src/app`) —
 the home page, `collections/[handle]`, and `products/[handle]` all read
 directly from `src/lib/shop.ts`, which is the **only** place the rest of the
 app is allowed to learn about products or collections; it wraps the mock
-catalogue in `src/data/products.ts` (20 products, 5 collections) so a real
-backend later means rewriting that one file. Cart state lives in
+catalogue in `src/data/products.ts` (20 products, 5 collections). That
+single-seam design keeps the *read* API consistent, but don't oversell what
+it buys you: `shop.ts`'s functions are synchronous, in-memory lookups, and
+five client components call them directly and unconditionally on every
+render — `Header`, `MobileNav`, `ProductRail`, `CartDrawer`, and
+`lib/cart/context`. Point `shop.ts` at a real backend and every one of those
+becomes a component that needs to fetch, which means restructuring all five
+(loading states, Suspense boundaries or async data-fetching, error handling
+for a call that can now fail), not just editing one file. It also means the
+entire catalogue currently ships in the client JS bundle, since these
+components import `shop.ts` straight into client-rendered code — there's no
+server/client split to lose today because there isn't one. Cart state lives in
 `src/lib/cart/`: a pure reducer (`reducer.ts`) and selectors (`selectors.ts`)
 that are unit-tested in isolation, `storage.ts` for localStorage
 persistence, and `context.tsx` exposing it all to client components. Scroll-driven
@@ -53,10 +70,28 @@ brand should be mechanical, not a rewrite.
    `public/collections/` using the `<handle>-<n>.webp` convention (e.g.
    `grid-tee-1.webp`, `grid-tee-2.webp` for the product with handle
    `grid-tee`), matching whatever `images` arrays you wrote into
-   `products.ts`. Run `npm run check:assets` — it parses every
-   `/products/...` and `/collections/...` path out of `products.ts` and
-   fails loudly if any referenced file isn't on disk.
-4. **Brand name** — the string `SECTOR—9` (with an em dash) appears in six
+   `products.ts`. **Every product needs at least two photos.**
+   `ProductCard` renders `images[0]` and `images[1]` side by side (the
+   second is the hover/cross-fade shot) and will throw at render time if
+   `images[1]` is missing — a product with a single photo isn't a smaller
+   version of the card, it's a crash. Run `npm run check:assets` — it
+   parses every `/products/...` and `/collections/...` path out of
+   `products.ts` and out of `src/components/**/*.tsx` (see "Running it"
+   above) and fails loudly if any referenced file isn't on disk. Note that
+   this only checks paths *exist*; it can't catch a product shipped with
+   just one photo, since one valid path is still a valid path.
+4. **The `drop-04` handle** — unlike other collection handles, `drop-04`
+   isn't only data-driven. It's hard-coded outside the catalogue in
+   `src/components/sections/Hero.tsx` (the hero's CTA link),
+   `src/app/not-found.tsx` (the 404 page's CTA),
+   `src/components/shop/CartDrawer.tsx` (the empty-bag CTA), and
+   `src/app/page.tsx` (a `CollectionTiles` tile and a `ProductRail`
+   handle). A client catalogue without a collection literally named
+   `drop-04` will still build and deploy, but those four CTAs link to a
+   collection page with zero products — search for the literal string
+   `drop-04` and repoint each one at whatever collection you want
+   featured.
+5. **Brand name** — the string `SECTOR—9` (with an em dash) appears in six
    places, not just the obvious layout ones:
    `src/app/layout.tsx` (root `<title>`), `src/components/layout/Header.tsx`,
    `src/components/layout/MobileNav.tsx`, `src/components/layout/Footer.tsx`,
@@ -66,6 +101,20 @@ brand should be mechanical, not a rewrite.
    catch all of them — a couple of product titles in `products.ts` (e.g.
    "SECTOR CREW") also contain the word "SECTOR" but are unrelated product
    copy, not the brand string.
+6. **Other copy and identity strings** — the brand-name and `drop-04`
+   sweeps above don't catch everything a fork needs to change. Also check:
+   `src/components/layout/AnnouncementMarquee.tsx` (the ticker items —
+   "DROP 04 LIVE NOW", shipping and production-run copy),
+   `src/components/sections/Hero.tsx` ("GRID READY" headline),
+   `src/components/sections/LookbookParallax.tsx` ("BUILT FOR THE
+   PADDOCK..." line and the `outerwear.webp` image it's built around),
+   `src/components/sections/Newsletter.tsx` ("GET DROP 05 FIRST"),
+   `src/components/layout/Footer.tsx` (the tagline and the "BUILT BY..."
+   credit line), the meta `description` (and OpenGraph copy) in
+   `src/app/layout.tsx`, and the `sector9.cart.v1` localStorage key
+   exported as `CART_KEY` from `src/lib/cart/storage.ts` — harmless to
+   leave as-is, but a client whose site shares a parent domain with another
+   `sector9`-keyed app could collide with it.
 
 ## Photo credits
 

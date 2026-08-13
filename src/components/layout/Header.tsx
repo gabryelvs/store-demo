@@ -66,6 +66,7 @@ export function Header() {
           <div className="flex items-center gap-4">
             <button
               type="button"
+              id="bag-toggle"
               onClick={openCart}
               className="font-display text-[11px] tracking-[0.16em] text-paper transition-colors duration-[var(--duration-ui)] hover:text-accent"
               aria-label={`Open bag, ${count} item${count === 1 ? "" : "s"}`}

@@ -121,7 +121,20 @@ export function CartDrawer() {
     return () => {
       window.removeEventListener("keydown", onKey);
       for (const el of backgroundEls) el.inert = false;
-      previouslyFocused?.focus();
+      // The drawer isn't only opened from the header's bag button — add()
+      // (see CartProvider) also opens it from quick-view's ADD TO BAG
+      // button. That button lives inside an AnimatePresence exit animation
+      // that finishes and unmounts it well before most users get around to
+      // closing the drawer again, so `previouslyFocused` is frequently a
+      // detached node by the time this cleanup runs. .focus() on a
+      // disconnected element is a silent no-op, which would otherwise drop
+      // focus to <body> with no visible indicator. Fall back to the bag
+      // toggle itself — the one opener guaranteed to still be mounted.
+      if (previouslyFocused?.isConnected) {
+        previouslyFocused.focus();
+      } else {
+        document.getElementById("bag-toggle")?.focus();
+      }
     };
   }, [isOpen, closeCart]);
 

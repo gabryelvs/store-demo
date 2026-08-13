@@ -5,6 +5,7 @@ import { AnnouncementMarquee } from "@/components/layout/AnnouncementMarquee";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartAnnouncer } from "@/components/shop/CartAnnouncer";
+import { CartDrawer } from "@/components/shop/CartDrawer";
 import "./globals.css";
 
 const display = Archivo({
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
           <Footer />
+          <CartDrawer />
         </CartProvider>
       </body>
     </html>

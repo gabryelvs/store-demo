@@ -21,11 +21,13 @@ const body = Inter({ subsets: ["latin"], variable: "--font-body-src" });
 
 export const metadata: Metadata = {
   // This demo is distributed by pasting its URL straight into a message, so
-  // the unfurl (OG/Twitter card) is often a prospect's first impression of
-  // it — worth getting right even though nothing here is deployed yet.
-  // localhost:3000 is the placeholder while dev-only; swap this for the
-  // deployed origin once the demo actually has one.
-  metadataBase: new URL("http://localhost:3000"),
+  // the unfurl (OG/Twitter card) is often a prospect's first impression of it.
+  // Relative image paths below resolve against this origin, which is why it has
+  // to be the deployed one — with localhost here the card renders blank for
+  // everyone but you. Change it if the deployment moves to a custom domain.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "https://store-demo-ruddy.vercel.app",
+  ),
   title: "SECTOR—9",
   description:
     "A fast, animated, accessible streetwear storefront demo — built to show what your catalogue could feel like on this stack.",

@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <AnnouncementMarquee />
           <Header />
-          <main id="main" className="pt-14">
+          <main id="main">
             {children}
           </main>
           <Footer />

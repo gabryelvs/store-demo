@@ -37,7 +37,7 @@ export function Header() {
       </a>
 
       <header
-        className={`fixed inset-x-0 top-0 z-40 transition-[transform,background-color,border-color] duration-[var(--duration-ui)] ease-brand ${
+        className={`sticky top-0 z-40 transition-[transform,background-color,border-color] duration-[var(--duration-ui)] ease-brand ${
           hidden ? "-translate-y-full" : "translate-y-0"
         } ${solid ? "border-b border-line bg-ink/85 backdrop-blur" : "border-b border-transparent"}`}
       >

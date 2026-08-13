@@ -25,7 +25,18 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
 
   useLockScroll(product !== null);
 
-  useEffect(() => setSku(null), [product?.handle]);
+  // Reset the size selection whenever a different product opens. This is
+  // React's documented "adjust state during render" pattern rather than an
+  // effect: the panel is a single long-lived instance (its `product` prop
+  // just swaps), so there is no mount/unmount to reset `sku` for free, but
+  // there is also no need to wait for a commit — comparing against the last
+  // handle we've seen and correcting `sku` inline resolves synchronously in
+  // this render, with no extra effect-triggered pass.
+  const [skuResetFor, setSkuResetFor] = useState(product?.handle);
+  if (product?.handle !== skuResetFor) {
+    setSkuResetFor(product?.handle);
+    setSku(null);
+  }
 
   useEffect(() => {
     if (!product) return;

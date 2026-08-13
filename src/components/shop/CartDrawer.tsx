@@ -28,15 +28,29 @@ export function CartDrawer() {
   // times out, reopening the bag later would re-tint whatever was added
   // last time as if it were just added again.
   const [tinted, setTinted] = useState<typeof lastAdded>(null);
+  // Sync `tinted` to `lastAdded` during render (React's "adjust state while
+  // rendering" pattern) rather than in an effect: this is a plain mirror of
+  // one value into another with no external system involved, so doing it
+  // here resolves in the same render instead of costing an extra
+  // effect-triggered pass. `add()` always creates a fresh lastAdded object,
+  // so re-adding the same line still counts as a change here.
+  const [tintedFor, setTintedFor] = useState<typeof lastAdded>(null);
+  if (lastAdded !== tintedFor) {
+    setTintedFor(lastAdded);
+    setTinted(lastAdded);
+  }
 
   useLockScroll(isOpen);
 
+  // The timeout itself is a genuine external subscription (React docs:
+  // "subscribe for updates from some external system, calling setState in a
+  // callback"), so it stays in an effect — it just no longer also performs
+  // the synchronous sync above.
   useEffect(() => {
-    if (!lastAdded) return;
-    setTinted(lastAdded);
+    if (!tinted) return;
     const timer = setTimeout(() => setTinted(null), 2000);
     return () => clearTimeout(timer);
-  }, [lastAdded]);
+  }, [tinted]);
 
   useEffect(() => {
     if (!isOpen) return;

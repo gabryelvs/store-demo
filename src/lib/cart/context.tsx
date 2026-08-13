@@ -40,9 +40,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   // The server renders an empty cart, so reading storage has to wait for mount.
-  // Doing it during render would produce a hydration mismatch.
+  // Doing it during render would produce a hydration mismatch: the header
+  // renders `count` straight into text (BAG (count)), so if a lazy
+  // initializer read localStorage synchronously the client's first render
+  // would already show the persisted count while the server-rendered HTML
+  // shows 0, and React would flag the mismatch. Deferring the read to this
+  // effect keeps the first client render identical to the server's, then
+  // corrects it once mounted — `setHydrated` also gates the persistence
+  // effect below so it can't fire with the pre-hydration empty state and
+  // clobber storage before the real cart is read back in.
   useEffect(() => {
     dispatch({ type: "HYDRATE", lines: readCart(isKnownSku) });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- see comment above the effect
     setHydrated(true);
   }, []);
 

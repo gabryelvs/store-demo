@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   // to be the deployed one — with localhost here the card renders blank for
   // everyone but you. Change it if the deployment moves to a custom domain.
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "https://store-demo-gv.fly.dev",
+    process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "https://demo.gabryelverissimo.dev",
   ),
   title: "SECTOR—9",
   description:

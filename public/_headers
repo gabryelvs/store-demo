@@ -1,0 +1,4 @@
+# Cloudflare Pages response headers (copied into out/ by the static export).
+# Next fingerprints everything under /_next/static, so it can be cached forever.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

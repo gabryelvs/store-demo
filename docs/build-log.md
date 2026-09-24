@@ -71,3 +71,13 @@ Vercel was the first target and got as far as a working deploy, then blocked the
 - Final whole-branch review (opus) + fix wave: commits d49bf85..e1ebce1. Verdict was "ready with caveats".
   - **Blocking bug it caught:** opening the mobile nav at 375px then widening past 768px left `body{overflow:hidden}` and `inert` on header/main/footer with the panel hidden by CSS — a dead page with no visible overlay, recoverable only by Escape or reload. Now closed on breakpoint change.
   - Also fixed: related rail excluded the current product, marquee loop switched from pixel to `xPercent` (it would have developed a seam once the webfont swapped), `global-error.tsx` added for layout-level crashes, hero `78vh` → `78svh` for iOS, OpenGraph metadata so the link unfurls, dead `usePrefersReducedMotion` deleted, duplicate cap copy differentiated, `check:assets` widened to scan components, README corrected (the "one file swaps the backend" claim was false — `lib/shop.ts` is imported by five client components).
+
+## 2026-09-23: static export on Cloudflare Pages
+
+Dependabot flagged next 16.3.0 (2 critical, fixed in 16.3.3). The patch mattered on Fly because
+the site ran a live Next server there, but Fly was blocking deploys over billing. Every route was
+already prerendered, so the site now builds as a static export (`output: "export"`,
+`trailingSlash: true`) and is served from Cloudflare Pages at https://demo.gabryelverissimo.dev.
+Vercel's Hobby plan was ruled out again because it excludes commercial use. The Dockerfile,
+.dockerignore and fly.toml are gone; the Fly app was deleted once the new site was verified.
+Also patched: next 16.3.5, vitest 4.1.11, sharp 0.35.4, js-yaml 4.3.2 (npm audit: 0).

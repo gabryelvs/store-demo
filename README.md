@@ -17,29 +17,38 @@ npm run check:assets   # fails the build if the catalogue references a missing p
 
 `npm run build` runs `check:assets` automatically via `prebuild`, so a missing
 product photo fails CI/build rather than shipping a broken image. `npm start`
-serves the production build.
+serves the exported site from `out/`.
 
 ## Deployment
 
-Live at **https://store-demo-gv.fly.dev** — one `shared-cpu-1x` machine in
-`lhr`, deployed from this repo with `flyctl deploy --remote-only` (no local
-Docker needed; Fly builds the image).
+Live at **https://demo.gabryelverissimo.dev**, served as plain files from
+Cloudflare Pages (free plan, which allows commercial use).
 
-`next.config.ts` sets `output: "standalone"` so the `Dockerfile` can ship the
-traced server bundle instead of a full `node_modules`, and `images.unoptimized`
-because the 51 photos in `public/` are already encoded at exactly the sizes the
-layout renders — re-optimising them at runtime would burn memory to produce the
-same bytes.
+Every route is prerendered at build time (collections and products come from
+`generateStaticParams`) and nothing needs a server, so `next.config.ts` sets
+`output: "export"` and `npm run build` writes the whole site to `out/`. With no
+Next server running there is no server-side code to keep patched: the site
+is HTML, JS and images on a CDN. `trailingSlash: true` gives each page its own
+`index.html` (`products/<handle>/index.html`) so any static host resolves it.
+`images.unoptimized` stays on because the 51 photos in `public/` are already
+encoded at exactly the sizes the layout renders, and a static export has no
+image optimizer anyway.
 
-The machine uses `auto_stop_machines = "suspend"` with `min_machines_running
-= 0`: it suspends when idle and resumes from a memory snapshot in well under a
-second, so an idle demo costs nothing but a cold link still opens instantly in
-front of a prospect.
+To redeploy after a change:
 
-To redeploy after a change: `flyctl deploy --remote-only`. If the app moves to
-a custom domain, update `metadataBase` in `src/app/layout.tsx` (or set
-`NEXT_PUBLIC_SITE_ORIGIN` at build time) or link previews will keep resolving
-their image against the old origin.
+```bash
+npm run build
+npx wrangler pages deploy out --project-name store-demo-gv --branch master
+```
+
+`npm start` serves `out/` locally. If the site moves to another domain, update
+`metadataBase` in `src/app/layout.tsx` (or set `NEXT_PUBLIC_SITE_ORIGIN` at
+build time) or link previews will keep resolving their image against the old
+origin.
+
+It previously ran as a Next.js server on Fly.io (`output: "standalone"` and a
+Dockerfile). It moved to a static export on 2026-09-23, when a Next.js
+security patch was due and Fly deploys were blocked; see `docs/build-log.md`.
 
 `check:assets` (`scripts/check-assets.mjs`) scans both `src/data/products.ts`
 and every `.tsx` file under `src/components/**` for `/products/...` and
